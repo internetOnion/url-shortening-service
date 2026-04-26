@@ -1,0 +1,38 @@
+services:
+    postgres:
+        container_name: postgres-url-shortener
+        image: postgres:15.0
+        environment:
+            POSTGRES_USER: ${POSTGRES_USERNAME}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        networks:
+            - url-shortener
+        restart: unless-stopped
+
+    api:
+        build: .
+        container_name: api-url-shortener
+        ports:
+            - "8080:8080"
+        networks:
+            - url-shortener
+        depends_on:
+            - postgres
+        restart: always
+        environment:
+            - SPRING_DATASOURCE_URL=${POSTGRES_URL}
+            - SPRING_DATASOURCE_USERNAME=${POSTGRES_USERNAME}
+            - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+
+networks:
+    url-shortener:
+        driver: bridge
+
+volumes:
+    postgres_data:
+        driver: local

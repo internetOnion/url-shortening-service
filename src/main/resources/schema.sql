@@ -1,0 +1,1 @@
+CREATE SEQUENCE IF NOT EXISTS short_code_seq;
