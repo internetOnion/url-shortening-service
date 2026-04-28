@@ -1,6 +1,6 @@
 # URL Shortening Service
 
-A REST API for shortening URLs built with Spring Boot 4 (Java 21) and PostgreSQL. Supports creating, retrieving, updating, deleting, and viewing stats for short URLs.
+A REST API for shortening URLs built with Spring Boot 4 (Java 21) and PostgreSQL. Supports creating, retrieving, updating, deleting, and viewing stats for short URLs. Provides a redirect endpoint to navigate from short codes to original URLs.
 
 ---
 
@@ -8,7 +8,7 @@ A REST API for shortening URLs built with Spring Boot 4 (Java 21) and PostgreSQL
 
 ### Overview
 
-All endpoints are served under `/shorten`. Request and response bodies use JSON. The short code is generated via a base62 encoding of a PostgreSQL sequence.
+All management endpoints are served under `/shorten`. The redirect endpoint is served at `/{shortCode}`. Request and response bodies use JSON. The short code is generated via a base62 encoding of a PostgreSQL sequence.
 
 ### Endpoints
 
@@ -52,9 +52,29 @@ POST /shorten
 
 ---
 
-#### 2. Get Short URL
+#### 2. Redirect to Original URL
 
-Retrieves a shortened URL by its short code. Increments the access count.
+Redirects to the original URL using the short code. Increments the access count.
+
+```
+GET /{shortCode}
+```
+
+**Path Variable**
+
+| Parameter   | Type   | Required | Description        |
+|-------------|--------|----------|--------------------|
+| `shortCode` | string | yes      | The short code     |
+
+**Response (`302 Found`)**
+
+Redirects the browser to the original URL via the `Location` header.
+
+---
+
+#### 3. Get Short URL Metadata
+
+Retrieves metadata for a shortened URL by its short code. Does **not** increment the access count.
 
 ```
 GET /shorten/{shortCode}
@@ -78,7 +98,7 @@ GET /shorten/{shortCode}
 
 ---
 
-#### 3. Update Short URL
+#### 4. Update Short URL
 
 Updates the destination URL for an existing short code.
 

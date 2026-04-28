@@ -3,6 +3,7 @@ package com.reaksmey.url_shortening_service;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,18 +41,14 @@ public class ShortenService {
             shortCode
         );
 
-        if (!shorten.isPresent()) {
+        if (shorten.isEmpty()) {
             log.debug("Resource not found for shortCode: {}", shortCode);
             throw new ResourceNotFoundException(
                 "Resource not found for shortCode: " + shortCode
             );
         }
 
-        Shorten foundShorten = shorten.get();
-        foundShorten.setAccessCount(foundShorten.getAccessCount() + 1);
-        shortenRepository.save(foundShorten);
-
-        return shortenMapper.toBasicResponse(foundShorten);
+        return shortenMapper.toBasicResponse(shorten.get());
     }
 
     @Transactional
@@ -62,7 +59,7 @@ public class ShortenService {
         Optional<Shorten> shorten = shortenRepository.findByShortCode(
             shortCode
         );
-        if (!shorten.isPresent()) {
+        if (shorten.isEmpty()) {
             throw new ResourceNotFoundException(
                 "Resource not found for shortCode"
             );
@@ -80,9 +77,9 @@ public class ShortenService {
         Optional<Shorten> shorten = shortenRepository.findByShortCode(
             shortCode
         );
-        if (!shorten.isPresent()) {
+        if (shorten.isEmpty()) {
             throw new ResourceNotFoundException(
-                "Resource not found for shortCode"
+                "Resource not found"
             );
         }
 
@@ -94,13 +91,33 @@ public class ShortenService {
         Optional<Shorten> shorten = shortenRepository.findByShortCode(
             shortCode
         );
-        if (!shorten.isPresent()) {
+        if (shorten.isEmpty()) {
             throw new ResourceNotFoundException(
                 "Resource not found for shortCode"
             );
         }
 
         return shortenMapper.toShortenStatsResponse(shorten.get());
+    }
+
+    @Transactional
+    public String getRedirectUrl(String shortCode) {
+        Optional<Shorten> shorten = shortenRepository.findByShortCode(
+            shortCode
+        );
+
+        if (shorten.isEmpty()) {
+            log.debug("Resource not found for shortCode: {}", shortCode);
+            throw new ResourceNotFoundException(
+                "Resource not found for shortCode: " + shortCode
+            );
+        }
+
+        Shorten foundShorten = shorten.get();
+        foundShorten.setAccessCount(foundShorten.getAccessCount() + 1);
+        shortenRepository.save(foundShorten);
+
+        return foundShorten.getUrl();
     }
 
     private String normalizeUrl(String url) {

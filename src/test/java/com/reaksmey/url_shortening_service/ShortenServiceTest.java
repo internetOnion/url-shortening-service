@@ -222,6 +222,44 @@ public class ShortenServiceTest {
     }
 
     @Test
+    public void ShortenService_getRedirectUrl_ShouldReturnUrlAndIncrementAccessCount() {
+        String shortCode = "a";
+        var entity = new Shorten(
+            UUID.randomUUID(),
+            "https://example.com",
+            shortCode,
+            5L,
+            null,
+            null
+        );
+
+        Mockito.when(shortenRepository.findByShortCode(shortCode)).thenReturn(
+            Optional.of(entity)
+        );
+        Mockito.when(shortenRepository.save(Mockito.any(Shorten.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        String result = shortenService.getRedirectUrl(shortCode);
+
+        Assertions.assertEquals("https://example.com", result);
+        Assertions.assertEquals(6L, entity.getAccessCount());
+        Mockito.verify(shortenRepository).save(entity);
+    }
+
+    @Test
+    public void ShortenService_getRedirectUrl_NotFound_ShouldThrow() {
+        String shortCode = "missing";
+
+        Mockito.when(shortenRepository.findByShortCode(shortCode)).thenReturn(
+            Optional.empty()
+        );
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () ->
+            shortenService.getRedirectUrl(shortCode)
+        );
+    }
+
+    @Test
     public void ShortenService_deleteShortenUrl_ShouldDeleteShorten() {
         String shortCode = "a";
         var entity = new Shorten(
