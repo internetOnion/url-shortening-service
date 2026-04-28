@@ -39,6 +39,10 @@ public class Shorten {
     @NotBlank(message = "Short code is required")
     private String shortCode;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Long accessCount = 0L;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -46,8 +50,4 @@ public class Shorten {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private Long accessCount = 0L;
 }

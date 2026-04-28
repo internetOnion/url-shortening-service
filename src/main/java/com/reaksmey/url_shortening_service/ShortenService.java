@@ -55,15 +55,21 @@ public class ShortenService {
     }
 
     private String normalizeUrl(String url) {
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            return "https://" + url;
+        try {
+            // Check if the URL has a scheme
+            URI uri = new URI(url);
+            if (uri.getScheme() != null) {
+                return url.endsWith("/")
+                    ? url.substring(0, url.length() - 1)
+                    : url;
+            }
+        } catch (URISyntaxException ignored) {
+            // No scheme, handle below
         }
-
-        if (url.endsWith("/")) {
-            return url.substring(0, url.length() - 1);
-        }
-
-        return url;
+        String normalized = "https://" + url;
+        return normalized.endsWith("/")
+            ? normalized.substring(0, normalized.length() - 1)
+            : normalized;
     }
 
     private void validateUrl(String url) {

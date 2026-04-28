@@ -1,7 +1,5 @@
-package com.reaksmey.url_shortening_service.repository;
+package com.reaksmey.url_shortening_service;
 
-import com.reaksmey.url_shortening_service.Shorten;
-import com.reaksmey.url_shortening_service.ShortenRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +14,15 @@ public class ShortenRepositoryTest {
     private ShortenRepository shortenRepository;
 
     @Test
-    public void ShortenRepository_save_ReturnsShorten() {
-        // Arrange
+    public void ShortenRepository_save_ShouldReturnsShorten() {
         String shortCode = "abc123";
         Shorten shorten = Shorten.builder()
             .shortCode(shortCode)
             .url("https://test.com")
             .build();
 
-        // Act
         Shorten saved = shortenRepository.save(shorten);
 
-        // Assert
         Assertions.assertNotNull(saved);
         Assertions.assertNotNull(saved.getAccessCount());
         Assertions.assertNotNull(saved.getCreatedAt());
@@ -38,8 +33,7 @@ public class ShortenRepositoryTest {
     }
 
     @Test
-    public void ShortenRepository_findByShortCode_ReturnShorten() {
-        // Arrange
+    public void ShortenRepository_findByShortCode_ShouldReturnsShorten() {
         String shortCode = "abc123";
         Shorten shorten = Shorten.builder()
             .shortCode(shortCode)
@@ -47,34 +41,28 @@ public class ShortenRepositoryTest {
             .build();
         shortenRepository.save(shorten);
 
-        // Act
         Shorten found = shortenRepository
             .findByShortCode(shortCode)
             .orElse(null);
 
-        // Assert
         Assertions.assertNotNull(found);
         Assertions.assertEquals(shortCode, found.getShortCode());
         Assertions.assertEquals("https://test.com", found.getUrl());
     }
 
     @Test
-    public void ShortenRepository_findByShortCode_ReturnNull() {
-        // Arrange
+    public void ShortenRepository_findByShortCode_ShouldReturnsNull() {
         String shortCode = "abc123";
 
-        // Act
         Shorten found = shortenRepository
             .findByShortCode(shortCode)
             .orElse(null);
 
-        // Assert
         Assertions.assertNull(found);
     }
 
     @Test
     public void ShortenRepository_updateUrl_ReturnUpdatedShorten() {
-        // Arrange
         String shortCode = "abc123";
         Shorten shorten = Shorten.builder()
             .shortCode(shortCode)
@@ -82,7 +70,6 @@ public class ShortenRepositoryTest {
             .build();
         shortenRepository.save(shorten);
 
-        // Act
         Shorten existedShorten = shortenRepository
             .findByShortCode(shortCode)
             .orElse(null);
@@ -93,7 +80,6 @@ public class ShortenRepositoryTest {
             updated = shortenRepository.save(existedShorten);
         }
 
-        // Assert
         Assertions.assertNotNull(updated);
         Assertions.assertNotNull(updated.getAccessCount());
         Assertions.assertNotNull(updated.getCreatedAt());
@@ -104,8 +90,7 @@ public class ShortenRepositoryTest {
     }
 
     @Test
-    public void ShortenRepsitory_deleteByShortCode_ReturnNull() {
-        // Arrange
+    public void ShortenRepsitory_deleteByShortCode_ShouldReturnsNull() {
         String shortCode = "abc123";
         Shorten shorten = Shorten.builder()
             .shortCode(shortCode)
@@ -113,13 +98,18 @@ public class ShortenRepositoryTest {
             .build();
         shortenRepository.save(shorten);
 
-        // Act
         shortenRepository.deleteByShortCode(shortCode);
         Shorten found = shortenRepository
             .findByShortCode(shortCode)
             .orElse(null);
 
-        // Assert
         Assertions.assertNull(found);
+    }
+
+    @Test
+    public void ShortenRepository_nextShortCodeSeq_ShouldReturnsNextSequence() {
+        Long seq = shortenRepository.getNextShortCodeSeq();
+        Assertions.assertNotNull(seq);
+        Assertions.assertEquals(1L, seq);
     }
 }
