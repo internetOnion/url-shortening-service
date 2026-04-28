@@ -220,4 +220,25 @@ public class ShortenServiceTest {
             Mockito.any(Shorten.class)
         );
     }
+
+    @Test
+    public void ShortenService_deleteShortenUrl_ShouldDeleteShorten() {
+        String shortCode = "a";
+        var entity = new Shorten(
+            UUID.randomUUID(),
+            "https://example.com",
+            shortCode,
+            0L,
+            null,
+            null
+        );
+
+        Mockito.when(shortenRepository.findByShortCode(shortCode)).thenReturn(
+            Optional.of(entity)
+        );
+
+        shortenService.deleteShortenUrl(shortCode);
+
+        Mockito.verify(shortenRepository).deleteByShortCode(shortCode);
+    }
 }
