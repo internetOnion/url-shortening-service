@@ -53,4 +53,12 @@ public class ShortenController {
         shortenService.deleteShortenUrl(shortCode);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("{shortCode}/stats")
+    public ResponseEntity<ShortenStatsResponse> getShortenStats(
+        @PathVariable @NotBlank String shortCode
+    ) {
+        var response = shortenService.findShortenStatsByShortCode(shortCode);
+        return ResponseEntity.ok(response);
+    }
 }
