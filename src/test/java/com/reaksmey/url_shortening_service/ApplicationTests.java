@@ -2,12 +2,12 @@ package com.reaksmey.url_shortening_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-class UrlShorteningServiceApplicationTests {
+@ActiveProfiles("test")
+class ApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {}
 }

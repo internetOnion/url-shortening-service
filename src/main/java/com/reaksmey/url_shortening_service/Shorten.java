@@ -35,7 +35,7 @@ public class Shorten {
     @Column(nullable = false)
     private String url;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     @NotBlank(message = "Short code is required")
     private String shortCode;
 

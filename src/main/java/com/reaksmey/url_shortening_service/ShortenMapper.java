@@ -8,5 +8,7 @@ import org.springframework.stereotype.Component;
 public interface ShortenMapper {
     Shorten ToEntity(String url, String shortUrl);
 
-    ShortenResponse toResponse(Shorten shorten);
+    ShortenBasicResponse toBasicResponse(Shorten shorten);
+
+    ShortenStatsResponse toShortenStatsResponse(Shorten shorten);
 }

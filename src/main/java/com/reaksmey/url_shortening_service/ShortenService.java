@@ -2,10 +2,13 @@ package com.reaksmey.url_shortening_service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShortenService {
@@ -16,22 +19,43 @@ public class ShortenService {
     private final ShortenMapper shortenMapper;
 
     @Transactional
-    public ShortenResponse createShortenUrl(ShortenRequest req) {
+    public ShortenBasicResponse createShortenUrl(ShortenRequest req) {
         String url = req.url().trim();
         String normalizeUrl = normalizeUrl(url);
         validateUrl(normalizeUrl);
 
         String shortCode = generateShortCode(url);
         Shorten shorten = Shorten.builder()
-            .url(url)
+            .url(normalizeUrl)
             .shortCode(shortCode)
             .build();
         var savedShorten = shortenRepository.save(shorten);
-        return shortenMapper.toResponse(savedShorten);
+
+        return shortenMapper.toBasicResponse(savedShorten);
+    }
+
+    @Transactional
+    public ShortenBasicResponse findShortenUrlByShortCode(String shortCode) {
+        Optional<Shorten> shorten = shortenRepository.findByShortCode(
+            shortCode
+        );
+
+        if (!shorten.isPresent()) {
+            log.debug("Resource not found for shortCode: {}", shortCode);
+            throw new ResourceNotFoundException(
+                "Resource not found for shortCode: " + shortCode
+            );
+        }
+
+        Shorten foundShorten = shorten.get();
+        foundShorten.setAccessCount(foundShorten.getAccessCount() + 1);
+        shortenRepository.save(foundShorten);
+
+        return shortenMapper.toBasicResponse(foundShorten);
     }
 
     private String normalizeUrl(String url) {
-        if (!url.startsWith("http://") || !url.startsWith("https://")) {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
             return "https://" + url;
         }
 
@@ -62,6 +86,7 @@ public class ShortenService {
                 );
             }
         } catch (URISyntaxException e) {
+            log.error("Invalid URL format: {}", e.getMessage());
             throw new IllegalArgumentException(
                 "Invalid URL format: " + e.getMessage()
             );
