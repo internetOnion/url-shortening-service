@@ -182,4 +182,42 @@ public class ShortenServiceTest {
             Mockito.any(Shorten.class)
         );
     }
+
+    @Test
+    public void ShortenService_updateShortenUrl_ShouldReturnsShortenBasicResponse() {
+        String shortCode = "a";
+        var updatedRequest = new ShortenRequest("https://updated.com");
+        var entity = new Shorten(
+            UUID.randomUUID(),
+            "https://example.com",
+            shortCode,
+            0L,
+            null,
+            null
+        );
+        var response = new ShortenBasicResponse(
+            entity.getId(),
+            updatedRequest.url(),
+            shortCode
+        );
+
+        Mockito.when(shortenRepository.findByShortCode(shortCode)).thenReturn(
+            Optional.of(entity)
+        );
+        Mockito.when(
+            shortenMapper.toBasicResponse(Mockito.any(Shorten.class))
+        ).thenReturn(response);
+
+        ShortenBasicResponse result = shortenService.updateShortenUrl(
+            shortCode,
+            updatedRequest
+        );
+
+        Assertions.assertEquals("https://updated.com", result.url());
+        Assertions.assertEquals(shortCode, result.shortCode());
+        Mockito.verify(shortenRepository).findByShortCode(shortCode);
+        Mockito.verify(shortenMapper).toBasicResponse(
+            Mockito.any(Shorten.class)
+        );
+    }
 }

@@ -54,6 +54,27 @@ public class ShortenService {
         return shortenMapper.toBasicResponse(foundShorten);
     }
 
+    @Transactional
+    public ShortenBasicResponse updateShortenUrl(
+        String shortCode,
+        ShortenRequest request
+    ) {
+        Optional<Shorten> shorten = shortenRepository.findByShortCode(
+            shortCode
+        );
+        if (!shorten.isPresent()) {
+            throw new ResourceNotFoundException(
+                "Resource not found for shortCode"
+            );
+        }
+
+        Shorten foundShorten = shorten.get();
+        foundShorten.setUrl(request.url());
+        shortenRepository.save(foundShorten);
+
+        return shortenMapper.toBasicResponse(foundShorten);
+    }
+
     private String normalizeUrl(String url) {
         try {
             // Check if the URL has a scheme
