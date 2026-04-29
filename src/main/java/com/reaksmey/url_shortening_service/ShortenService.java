@@ -113,11 +113,9 @@ public class ShortenService {
             );
         }
 
-        Shorten foundShorten = shorten.get();
-        foundShorten.setAccessCount(foundShorten.getAccessCount() + 1);
-        shortenRepository.save(foundShorten);
+        shortenRepository.incrementAccessCount(shortCode);
 
-        return foundShorten.getUrl();
+        return shorten.get().getUrl();
     }
 
     private String normalizeUrl(String url) {

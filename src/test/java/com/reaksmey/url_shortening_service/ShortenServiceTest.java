@@ -236,14 +236,12 @@ public class ShortenServiceTest {
         Mockito.when(shortenRepository.findByShortCode(shortCode)).thenReturn(
             Optional.of(entity)
         );
-        Mockito.when(shortenRepository.save(Mockito.any(Shorten.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.doNothing().when(shortenRepository).incrementAccessCount(shortCode);
 
         String result = shortenService.getRedirectUrl(shortCode);
 
         Assertions.assertEquals("https://example.com", result);
-        Assertions.assertEquals(6L, entity.getAccessCount());
-        Mockito.verify(shortenRepository).save(entity);
+        Mockito.verify(shortenRepository).incrementAccessCount(shortCode);
     }
 
     @Test

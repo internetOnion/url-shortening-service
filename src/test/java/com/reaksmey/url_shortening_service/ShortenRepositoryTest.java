@@ -1,5 +1,7 @@
 package com.reaksmey.url_shortening_service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,9 @@ public class ShortenRepositoryTest {
 
     @Autowired
     private ShortenRepository shortenRepository;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
     @Test
     public void ShortenRepository_save_ShouldReturnsShorten() {
@@ -27,7 +32,7 @@ public class ShortenRepositoryTest {
         Assertions.assertNotNull(saved.getAccessCount());
         Assertions.assertNotNull(saved.getCreatedAt());
         Assertions.assertNotNull(saved.getUpdatedAt());
-        Assertions.assertEquals(saved.getAccessCount(), 0L);
+        Assertions.assertEquals(0L, saved.getAccessCount());
         Assertions.assertEquals(shortCode, saved.getShortCode());
         Assertions.assertEquals("https://test.com", saved.getUrl());
     }
@@ -84,13 +89,13 @@ public class ShortenRepositoryTest {
         Assertions.assertNotNull(updated.getAccessCount());
         Assertions.assertNotNull(updated.getCreatedAt());
         Assertions.assertNotNull(updated.getUpdatedAt());
-        Assertions.assertEquals(updated.getAccessCount(), 0L);
+        Assertions.assertEquals(0L, updated.getAccessCount());
         Assertions.assertEquals(shortCode, updated.getShortCode());
         Assertions.assertEquals("https://updated.com", updated.getUrl());
     }
 
     @Test
-    public void ShortenRepsitory_deleteByShortCode_ShouldReturnsNull() {
+    public void ShortenRepository_deleteByShortCode_ShouldReturnsNull() {
         String shortCode = "abc123";
         Shorten shorten = Shorten.builder()
             .shortCode(shortCode)
@@ -112,4 +117,26 @@ public class ShortenRepositoryTest {
         Assertions.assertNotNull(seq);
         Assertions.assertEquals(1L, seq);
     }
+
+	@Test
+	public void ShortenRepository_incrementAccessCount_ShouldIncrementAccessCount() {
+		String shortCode = "abc123";
+		Shorten shorten = Shorten.builder()
+			.shortCode(shortCode)
+			.url("https://test.com")
+			.build();
+		shortenRepository.save(shorten);
+
+		shortenRepository.incrementAccessCount(shortCode);
+
+		entityManager.flush();
+		entityManager.clear();
+
+		Shorten found = shortenRepository
+			.findByShortCode(shortCode)
+			.orElse(null);
+
+		Assertions.assertNotNull(found);
+		Assertions.assertEquals(1L, found.getAccessCount());
+	}
 }
